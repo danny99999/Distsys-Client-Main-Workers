@@ -5,17 +5,17 @@ import aiohttp
 
 glavniPort= 8080
 
-X= 1000
+M= 1000
 maxBrTrazenihOdgovora= 10000
 brPrimljenihZahtjeva= 0
 brVracenihOdgovora= 0
 brPoslanihZadataka= 0
 brIzvrsenihZadataka= 0
 
-Y= random.randint(5, 10)
-print("Number of workers:", Y)
+N= random.randint(5, 10)
+print("Number of workers:", N)
 
-workers= {"workerWithId"+str(id): [] for id in range(1, Y+1)}
+workers= {"workerWithId"+str(id): [] for id in range(1, N+1)}
 print("Workers:", workers)
 
 routes= web.RouteTableDef()
@@ -23,7 +23,7 @@ routes= web.RouteTableDef()
 @routes.get("/")
 async def func(request):
     try:
-        global Y, workers, X
+        global N, workers, M
         global maxBrTrazenihOdgovora
         global brPrimljenihZahtjeva, brVracenihOdgovora
         global brPoslanihZadataka, brIzvrsenihZadataka
@@ -35,7 +35,7 @@ async def func(request):
         
         sviKodovi= '\n'.join(podatci.get("codes"))
         kodovi= sviKodovi.split("\n")
-        podatci["codes"]= ["\n".join(kodovi[i:i+X]) for i in range(0, len(kodovi), X)]
+        podatci["codes"]= ["\n".join(kodovi[i:i+M]) for i in range(0, len(kodovi), M)]
         
         zadatci= []
         rezultati= []
@@ -47,7 +47,7 @@ async def func(request):
                 print(f"Novi zadatak poslan na worker {trenutniWorker}. Trenutno stanje poslanih zadataka: {brPoslanihZadataka}")
                 zadatci.append(zadatak)
                 workers["workerWithId"+str(trenutniWorker)].append(zadatak)
-                if trenutniWorker == Y:
+                if trenutniWorker == N:
                     trenutniWorker= 1
                 else:
                     trenutniWorker +=1
