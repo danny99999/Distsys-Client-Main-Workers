@@ -2,8 +2,10 @@ from aiohttp import web
 import random
 import asyncio
 import aiohttp
+import logging
 
 glavniPort= 8080
+logging.basicConfig(level = logging.INFO, format = '%(asctime)s - %(message)s', datefmt = '%Y-%m-%d %H:%M:%S')
 
 M= 1000
 maxBrTrazenihOdgovora= 10000
@@ -29,7 +31,7 @@ async def func(request):
         global brPoslanihZadataka, brIzvrsenihZadataka
         
         brPrimljenihZahtjeva +=1
-        print(f"Novi zahtjev primljen. Trenutno stanje primljenih zahtjeva: {brPrimljenihZahtjeva} / {maxBrTrazenihOdgovora}")
+        logging.info(f"Novi zahtjev primljen. Trenutno stanje primljenih zahtjeva: {brPrimljenihZahtjeva} / {maxBrTrazenihOdgovora}")
         podatci= await request.json()
         duzinaKoda= len(podatci.get("codes"))
         
@@ -44,7 +46,7 @@ async def func(request):
             for i in range(len(podatci.get("codes"))):
                 zadatak= asyncio.create_task(session.get(f"http://127.0.0.1:{8080+trenutniWorker}/", json= {"id": podatci.get("client"), "podatci": podatci.get("codes")[i]}))
                 brPoslanihZadataka +=1
-                print(f"Novi zadatak poslan na worker {trenutniWorker}. Trenutno stanje poslanih zadataka: {brPoslanihZadataka}")
+                logging.info(f"Novi zadatak poslan na worker {trenutniWorker}. Trenutno stanje poslanih zadataka: {brPoslanihZadataka}")
                 zadatci.append(zadatak)
                 workers["workerWithId"+str(trenutniWorker)].append(zadatak)
                 if trenutniWorker == N:
@@ -54,12 +56,12 @@ async def func(request):
                     
             rezultati= await asyncio.gather(*zadatci)
             brIzvrsenihZadataka += len(rezultati)
-            print(f"Još {len(rezultati)} zadataka je izvršeno. Trenutno stanje dovršenih zadataka: {brIzvrsenihZadataka}")
+            logging.info(f"Još {len(rezultati)} zadataka je izvršeno. Trenutno stanje dovršenih zadataka: {brIzvrsenihZadataka}")
             rezultati= [await rezultat.json() for rezultat in rezultati]
             rezultati= [rezultat.get("numberOfWords") for rezultat in rezultati]
             
         brVracenihOdgovora += 1
-        print(f"Novi odgovor poslan. Trenutno stanje poslanih odgovora: {brVracenihOdgovora} / {maxBrTrazenihOdgovora}")   
+        logging.info(f"Novi odgovor poslan. Trenutno stanje poslanih odgovora: {brVracenihOdgovora} / {maxBrTrazenihOdgovora}")   
         
         return web.json_response({"naziv": "master", "status": "OK", "klijent": podatci.get("client"), "prosječanBrRiječi": round(sum(rezultati) / duzinaKoda, 2)}, status = 200)
         

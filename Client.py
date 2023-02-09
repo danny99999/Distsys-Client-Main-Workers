@@ -13,11 +13,11 @@ redoviPoKlijentu= int(len(dataframe) / len(listaIdKlijenata))
 
 klijenti= {id:[] for id in listaIdKlijenata}
 
-for id, codes in klijenti.items():
+for id, kodovi in klijenti.items():
     odReda= (id-1)*redoviPoKlijentu
     doReda= odReda+redoviPoKlijentu
     for index, red in dataframe.iloc[odReda+1:doReda+1].iterrows():
-        codes.append(red.get("content"))
+        kodovi.append(red.get("content"))
         
 zadatci=[]
 rezultati=[]
@@ -28,8 +28,8 @@ async def procesiranjeKoda():
     
     print("Slanje podataka\n")
     async with aiohttp.ClientSession(connector= aiohttp.TCPConnector(ssl= False)) as session:
-        for id, codes in klijenti.items():
-            zadatci.append(asyncio.create_task(session.get("http://127.0.0.1:8080/", json= {"client":id, "codes":codes})))
+        for id, kodovi in klijenti.items():
+            zadatci.append(asyncio.create_task(session.get("http://127.0.0.1:8080/", json= {"client":id, "codes":kodovi})))
         print("Podatci poslani.\n")
         print("Čekanje svih odgovora...\n")
         rezultati= await asyncio.gather(*zadatci)

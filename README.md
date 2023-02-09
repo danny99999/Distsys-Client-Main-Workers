@@ -23,4 +23,5 @@
     -pandas
     -random
     -re
-    -string        
+    -string
+    -logging        
